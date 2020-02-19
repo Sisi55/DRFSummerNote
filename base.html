@@ -1,0 +1,105 @@
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <title>Summernote with Bootstrap 4</title>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.15/dist/summernote-bs4.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.15/dist/summernote-bs4.min.js"></script>
+</head>
+<body>
+    <!-- <div id="summernote"></div> -->
+    <form> 
+        <!-- 드롭박스 -->
+        <div class="form-group">
+            <label for="contentType">유형</label>
+            <select class="form-control" id="contentType">
+                <option>1:1 요청</option> 
+                <option>수정 요청</option>
+                <option>게시 요청</option>
+            </select>
+        </div>
+        <!-- title -->
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="email" class="form-control" id="title" aria-describedby="emailHelp">
+        </div>
+
+        <!-- contents -->
+        <div class="form-group">
+            <textarea id="summernote" name="editordata"></textarea>
+        </div>
+
+        <button id="btn-save" type="button" class="btn btn-primary btn-lg">글 작성</button> 
+    </form>
+
+    <script>
+        function sendFile(file, editor){
+            // 파일 전송을 위한 폼 생성
+            data = new FormData();
+            data.append("image", file);
+            $.ajax({
+                data: data,
+                type: "POST",
+                url: "http://127.0.0.1:8000/help-center/img/", 
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(data){ 
+                    // 처리 성공하면, 에디터에 이미지 출력
+                    console.log('결과: '+data.image);
+                    $(editor).summernote('editor.insertImage', data.image);
+                }
+            });
+        }
+
+        $('#summernote').summernote({
+            placeholder: 'Cogether 고객센터',
+            tabsize: 2,
+            height: 300,
+            callbacks:{
+                // 이미지를 업로드할 경우 이벤트를 발생
+                onImageUpload: function(files,editor,welEditable){
+                    sendFile(files[0], this);
+                }
+            }
+        });
+
+        var main = {
+            init: function(){
+                var _this = this;
+
+                $("#btn-save").on('click', function(){
+                    _this.save();
+                });
+            },
+
+            save: function(){
+                var data = { 
+                    // contentType: ,
+                    title: 'front test title',//$("#title").val(),
+                    contents: $("#summernote").val(), 
+                };
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://127.0.0.1:8000/help-center/write/',
+                    dataType: 'json',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify(data)
+                }).done(function(){
+                    alert('ok');
+                    //window.location.href = 'write.html';
+                });
+            }
+        };
+
+        main.init();
+    </script>
+
+</body>
+</html>

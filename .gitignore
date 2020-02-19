@@ -1,0 +1,5 @@
+/django-docker-s3
+/django/venv
+/django/.idea
+/django/db.sqlite3
+/django/static
